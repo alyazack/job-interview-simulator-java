@@ -1,0 +1,314 @@
+package finaljava; 
+
+import javax.swing.*; 
+import java.util.*; 
+
+public class JobInterviewSimulator { 
+    static Random random = new Random(); 
+    
+    static class Question { 
+        String text; 
+        List<String> keywords; 
+
+        Question(String text, List<String> keywords) { 
+            this.text = text; 
+            this.keywords = keywords; 
+        } 
+    } 
+
+    static class InterviewResponse { 
+        String question; 
+        String answer; 
+        int score; 
+        
+        InterviewResponse(String question, String answer, int score) { 
+            this.question = question; 
+            this.answer = answer; 
+            this.score = score; 
+        } 
+    } 
+    static Map<String, List<Question>> occupationQuestions = new HashMap<>(); 
+    public static void main(String[] args) { 
+        initializeQuestions(); 
+        String[] occupationArray = occupationQuestions.keySet().toArray(new String[0]); 
+        String selectedOccupation = (String) JOptionPane.showInputDialog(
+        		null, 
+                "Choose an occupation:", 
+                "Occupation Selection", 
+                JOptionPane.PLAIN_MESSAGE, 
+                null, 
+
+                occupationArray, 
+
+                occupationArray[0]); 
+
+        if (selectedOccupation == null) { 
+            JOptionPane.showMessageDialog(null, "No occupation selected. Exiting."); 
+            return; 
+        } 
+
+        List<Question> questions = occupationQuestions.get(selectedOccupation); 
+        Collections.shuffle(questions); 
+
+        List<InterviewResponse> responses = new ArrayList<>();
+
+        for (int i = 0; i < 5; i++) { 
+            Question q = questions.get(i); 
+            String answer = JOptionPane.showInputDialog(null, "Q" + (i + 1) + ": " + q.text); 
+
+            if (answer == null) { 
+                answer = "(No answer)"; 
+            } 
+
+            int score = evaluateAnswer(answer, q.keywords); 
+            responses.add(new InterviewResponse(q.text, answer, score)); 
+
+        } 
+        showResults(responses, selectedOccupation); 
+    } 
+
+    static int evaluateAnswer(String answer, List<String> keywords) { 
+        int score = random.nextInt(31) + 50; // 50–80 
+        for (String keyword : keywords) { 
+            if (answer.toLowerCase().contains(keyword.toLowerCase())) { 
+                score += 4; 
+            } 
+        } 
+        return Math.min(score, 100); 
+    } 
+
+    static void showResults(List<InterviewResponse> responses, String occupation) { 
+        StringBuilder result = new StringBuilder(); 
+        int totalScore = 0; 
+        result.append("Interview Summary for ").append(occupation).append(":\n\n"); 
+
+        for (int i = 0; i < responses.size(); i++) { 
+            InterviewResponse r = responses.get(i); 
+            result.append("Q").append(i + 1).append(": ").append(r.question).append("\n"); 
+            result.append("Your Answer: ").append(r.answer).append("\n"); 
+            result.append("Score: ").append(r.score).append("/100\n\n"); 
+            totalScore += r.score; 
+        } 
+
+        double average = totalScore / 5.0; 
+        result.append(String.format("Average Score: %.2f/100\n", average)); 
+        if (average >= 85) { 
+            result.append("🎉 Excellent! You’re a great fit for the job."); 
+        } else if (average >= 70) { 
+            result.append("🙂 Good job. You may need a bit more preparation."); 
+        } else { 
+            result.append("😬 Needs improvement. Consider brushing up before the next interview."); 
+        } 
+
+        JOptionPane.showMessageDialog(null, result.toString(), "Interview Result", JOptionPane.INFORMATION_MESSAGE); 
+    } 
+
+    static void initializeQuestions() { 
+    	occupationQuestions.put("Doctor", Arrays.asList( 
+    		    new Question("A patient arrives with severe chest pain. What is your first step?", Arrays.asList("triage", "emergency", "diagnosis")), 
+    		    new Question("A colleague makes an incorrect diagnosis. How do you handle it?", Arrays.asList("ethics", "communication", "accountability")), 
+    		    new Question("What do you do if a patient refuses critical treatment?", Arrays.asList("informed consent", "autonomy", "ethics")), 
+    		    new Question("How would you handle a shortage of resources during an emergency?", Arrays.asList("prioritization", "ethics", "resource management")), 
+    		    new Question("How do you explain complex medical issues to a nervous patient?", Arrays.asList("communication", "empathy", "clarity")), 
+    		    new Question("You are assigned to a high-stress ICU shift. How do you manage your workload?", Arrays.asList("time management", "stress", "multitasking")), 
+    		    new Question("A patient’s family demands an expensive treatment not covered by insurance. What do you do?", Arrays.asList("insurance", "ethics", "negotiation")), 
+    		    new Question("You need to inform a family about a terminal diagnosis. How do you approach it?", Arrays.asList("communication", "compassion", "ethics")), 
+    		    new Question("A new medical technology has emerged. How do you stay updated?", Arrays.asList("continuing education", "research", "adaptability")), 
+    		    new Question("What steps do you take to ensure ethical treatment in a medical facility?", Arrays.asList("ethics", "compliance", "protocol")) 
+        )); 
+
+        occupationQuestions.put("Teacher", Arrays.asList( 
+        		new Question("You notice a student struggling academically. How do you help?", Arrays.asList("support", "individualized", "intervention")), 
+        	    new Question("A student refuses to do homework. How do you motivate them?", Arrays.asList("engagement", "motivation", "behavior")), 
+        	    new Question("How do you handle a disruptive student in class?", Arrays.asList("discipline", "classroom management", "communication")), 
+        	    new Question("How do you adjust lessons for students with different learning abilities?", Arrays.asList("differentiation", "inclusion", "adaptation")), 
+        	    new Question("A parent complains about your grading system. How do you respond?", Arrays.asList("transparency", "communication", "feedback")), 
+        	    new Question("You suspect bullying in class. How do you address it?", Arrays.asList("intervention", "empathy", "policy")), 
+        	    new Question("One of your best students suddenly loses interest in learning. What do you do?", Arrays.asList("engagement", "counseling", "motivation")), 
+        	    new Question("How do you incorporate technology in the classroom?", Arrays.asList("edtech", "tools", "blended learning")), 
+        	    new Question("Describe a creative lesson plan you've designed.", Arrays.asList("innovation", "engagement", "project-based")), 
+        	    new Question("How do you manage time effectively with multiple subjects?", Arrays.asList("scheduling", "prioritization", "efficiency")) 
+        )); 
+
+        occupationQuestions.put("Software Engineer", Arrays.asList( 
+        		 new Question("You're assigned a tight deadline project. How do you approach it?", Arrays.asList("agile", "scrum", "velocity")), 
+        		 new Question("How do you debug an error you cannot replicate?", Arrays.asList("log", "trace", "exception")), 
+        		 new Question("How do you handle a colleague writing inefficient code?", Arrays.asList("refactor", "complexity", "performance")), 
+        		 new Question("Describe how you optimize a slow-running database query.", Arrays.asList("index", "query plan", "latency")), 
+        		 new Question("You discover a security vulnerability in your software. What steps do you take?", Arrays.asList("exploit", "patch", "validation")), 
+        		 new Question("Your team disagrees on software architecture. How do you reach a decision?", Arrays.asList("tradeoff", "modularity", "scalability")), 
+        		 new Question("A client requests a last-minute change in a finalized application. How do you handle it?", Arrays.asList("version", "CI/CD", "rollback")), 
+        		 new Question("How do you manage coding in a multi-developer project?", Arrays.asList("merge", "branch", "conflict")), 
+        		 new Question("Explain how you prioritize tasks when working on multiple projects.", Arrays.asList("priority", "impact", "kanban")), 
+        		 new Question("What considerations do you take when building scalable software?", Arrays.asList("throughput", "load", "horizontal scaling")) 
+        )); 
+
+        occupationQuestions.put("Lawyer", Arrays.asList( 
+        		new Question("You have a case with limited evidence. How do you build your argument?", Arrays.asList("feature_selection", "bootstrap", "generalization")), 
+        	    new Question("A client asks you to do something unethical. How do you handle it?", Arrays.asList("precision", "bias", "false_positive", "ethics")), 
+        	    new Question("Describe how you would approach a high-profile criminal defense case.", Arrays.asList("classification", "target_variable", "cross_validation")), 
+        	    new Question("How do you negotiate settlements in tough cases?", Arrays.asList("optimization", "cost_function", "tradeoff")),
+        	    new Question("You receive confidential information from an opposing party. What do you do?", Arrays.asList("regularization", "noise", "overfitting", "dropout")), 
+        	    new Question("A witness becomes uncooperative before trial. How do you handle it?", Arrays.asList("data_cleaning", "missing_values", "interpolation")), 
+        	    new Question("How do you prepare for a case with a tight deadline?", Arrays.asList("pipeline", "automation", "efficiency")), 
+        	    new Question("A client wants to go to trial, but settlement is a better option. How do you advise them?", Arrays.asList("risk_analysis", "decision_tree", "expected_value")), 
+        	    new Question("You’re in court and an unexpected legal challenge arises. How do you respond?", Arrays.asList("model_adaptation", "real_time", "error_handling")), 
+        	    new Question("How do you persuade a jury when evidence is not strongly in your favor?", Arrays.asList("visualization", "narrative", "inference")) 
+        )); 
+
+        occupationQuestions.put("Chef", Arrays.asList( 
+        		new Question("What inspired you to become a chef?", Arrays.asList("passion", "origin", "data-driven taste")), 
+        	    new Question("Describe your cooking style.", Arrays.asList("categorical", "profile", "preference")), 
+        	    new Question("How do you handle pressure in a busy kitchen?", Arrays.asList("stress", "real-time", "performance")), 
+        	    new Question("What is your signature dish?", Arrays.asList("label", "unique", "pattern")), 
+        	    new Question("How do you ensure food quality?", Arrays.asList("control", "consistency", "monitoring")), 
+        	    new Question("Describe a difficult customer situation you've managed.", Arrays.asList("feedback", "sentiment", "response")), 
+        	    new Question("How do you develop new recipes?", Arrays.asList("experiment", "iteration", "optimization")), 
+        	    new Question("What is your approach to food presentation?", Arrays.asList("visualize", "aesthetics", "arrangement")), 
+        	    new Question("Tell me about a time you improvised a meal.", Arrays.asList("missing data", "substitute", "approximation")), 
+        	    new Question("What does food mean to you?", Arrays.asList("expression", "model", "identity")) 
+        )); 
+
+        occupationQuestions.put("Pilot", Arrays.asList( 
+        		new Question("Why did you choose to become a pilot?", Arrays.asList("trajectory", "goal", "motivation")), 
+        	    new Question("Describe a challenging flight experience.", Arrays.asList("anomaly", "error", "fail-safe")), 
+        	    new Question("How do you handle emergency situations?", Arrays.asList("decision tree", "protocol", "threshold")), 
+        	    new Question("What are the most important skills for a pilot?", Arrays.asList("precision", "reaction time", "awareness")), 
+        	    new Question("How do you prepare for a flight?", Arrays.asList("checklist", "planning", "forecast")), 
+        	    new Question("What do you love most about flying?", Arrays.asList("perspective", "exploration", "reward")), 
+        	    new Question("How do you communicate with air traffic control?", Arrays.asList("signal", "sequence", "clarity")),
+        	    new Question("Describe your experience with navigation technology.", Arrays.asList("GPS", "real-time", "predictive")), 
+        	    new Question("What is your experience with different aircraft models?", Arrays.asList("classification", "variant", "specs")), 
+        	    new Question("What advice would you give aspiring pilots?", Arrays.asList("training", "experience", "model learning")) 
+        )); 
+        
+        occupationQuestions.put("Architect", Arrays.asList( 
+        	    new Question("What led you to pursue architecture?", Arrays.asList("design", "passion", "career")), 
+        	    new Question("Describe a design project you're proud of.", Arrays.asList("creativity", "innovation", "execution")), 
+        	    new Question("How do you balance creativity with functionality?", Arrays.asList("aesthetics", "usability", "practicality")), 
+        	    new Question("What software do you use for architectural design?", Arrays.asList("autocad", "revit", "bim")), 
+        	    new Question("How do you handle client expectations?", Arrays.asList("communication", "negotiation", "feedback")), 
+        	    new Question("Describe your experience with sustainable architecture.", Arrays.asList("green", "energy", "sustainability")), 
+        	    new Question("What trends do you see shaping architecture?", Arrays.asList("technology", "design", "future")), 
+        	    new Question("How do you approach teamwork in large projects?", Arrays.asList("collaboration", "coordination", "teamwork")), 
+        	    new Question("How do you ensure structural safety?", Arrays.asList("compliance", "codes", "engineering")), 
+        	    new Question("What inspires your designs?", Arrays.asList("nature", "culture", "vision")) 
+        	)); 
+
+        	occupationQuestions.put("Accountant", Arrays.asList( 
+        	    new Question("What led you to a career in accounting?", Arrays.asList("finance", "numbers", "career")), 
+        	    new Question("Describe your experience with financial reporting.", Arrays.asList("statements", "accuracy", "compliance")), 
+        	    new Question("How do you ensure accuracy in financial statements?", Arrays.asList("audit", "reconciliation", "double-check")), 
+        	    new Question("What accounting software do you use?", Arrays.asList("quickbooks", "xero", "erp")), 
+        	    new Question("How do you handle financial audits?", Arrays.asList("documentation", "compliance", "internal control")), 
+        	    new Question("Describe a challenging financial problem you've solved.", Arrays.asList("analysis", "solution", "challenge")), 
+        	    new Question("How do you stay updated with tax regulations?", Arrays.asList("tax", "laws", "training")), 
+        	    new Question("What is your experience with cost management?", Arrays.asList("budgeting", "control", "efficiency")), 
+        	    new Question("What role does ethics play in accounting?", Arrays.asList("integrity", "ethics", "trust")), 
+        	    new Question("How do you explain complex financial concepts to clients?", Arrays.asList("communication", "simplification", "clarity")) 
+        	)); 
+
+        	occupationQuestions.put("Nurse", Arrays.asList( 
+        	    new Question("Why did you choose to become a nurse?", Arrays.asList("compassion", "service", "career")), 
+        	    new Question("Describe your experience with patient care.", Arrays.asList("care", "treatment", "communication")), 
+        	    new Question("How do you handle stressful situations in healthcare?", Arrays.asList("resilience", "management", "calm")), 
+        	    new Question("What skills make a great nurse?", Arrays.asList("empathy", "knowledge", "communication")), 
+        	    new Question("How do you collaborate with doctors and medical staff?", Arrays.asList("teamwork", "coordination", "trust")), 
+        	    new Question("Tell me about a challenging patient case.", Arrays.asList("problem-solving", "care", "challenge")), 
+        	    new Question("How do you handle emotional distress from patients?", Arrays.asList("support", "counseling", "compassion")), 
+        	    new Question("Describe your approach to patient education.", Arrays.asList("teaching", "health literacy", "guidance")), 
+        	    new Question("What do you find most fulfilling about nursing?", Arrays.asList("helping", "healing", "impact")), 
+        	    new Question("How do you ensure patient safety?", Arrays.asList("protocol", "checklist", "precaution")) 
+        	)); 
+
+        	occupationQuestions.put("Police Officer", Arrays.asList( 
+        	    new Question("A suspect refuses to cooperate. How do you de-escalate?", Arrays.asList("calm", "communication", "tactics")), 
+        	    new Question("Describe a situation where quick thinking saved lives.", Arrays.asList("decision", "reaction", "safety")), 
+        	    new Question("How do you balance enforcing laws with compassion?", Arrays.asList("ethics", "discretion", "community")), 
+        	    new Question("How do you approach community policing?", Arrays.asList("engagement", "trust", "partnership")), 
+        	    new Question("How do you ensure ethical behavior in law enforcement?", Arrays.asList("integrity", "policy", "training")),
+        	    new Question("Describe a crime investigation strategy you've used.", Arrays.asList("investigation", "evidence", "procedure")), 
+        	    new Question("How do you manage high-pressure situations?", Arrays.asList("stress", "focus", "calm")), 
+        	    new Question("What role does technology play in modern policing?", Arrays.asList("surveillance", "data", "forensics")), 
+        	    new Question("How would you respond to an unpredictable public disturbance?", Arrays.asList("crowd control", "judgment", "response")), 
+        	    new Question("What training methods do you use to stay prepared?", Arrays.asList("drills", "fitness", "scenario")) 
+        	)); 
+
+        	occupationQuestions.put("Data Analyst", Arrays.asList( 
+        	    new Question("How do you approach cleaning and preparing messy datasets?", Arrays.asList("cleaning", "wrangling", "quality")), 
+        	    new Question("What steps do you take to analyze trends in large datasets?", Arrays.asList("trends", "insights", "visualization")), 
+        	    new Question("Describe a challenging analytics project you worked on.", Arrays.asList("project", "challenge", "solution")), 
+        	    new Question("How do you decide which data visualization method is most effective?", Arrays.asList("chart", "clarity", "audience")), 
+        	    new Question("Explain a situation where data analysis led to a major decision in your company.", Arrays.asList("impact", "decision", "value")), 
+        	    new Question("How do you handle missing or inconsistent data?", Arrays.asList("impute", "clean", "drop")), 
+        	    new Question("Your manager asks you to find insights for a product launch. How do you proceed?", Arrays.asList("insights", "product", "strategy")), 
+        	    new Question("Describe the biggest challenge in predictive analytics.", Arrays.asList("model", "accuracy", "data")), 
+        	    new Question("How do you ensure accuracy in your reports?", Arrays.asList("validation", "cross-check", "qa")), 
+        	    new Question("Explain your approach to building an automated data pipeline.", Arrays.asList("etl", "pipeline", "automation")) 
+        	)); 
+
+        	occupationQuestions.put("Journalist", Arrays.asList( 
+        	    new Question("How do you handle reporting on sensitive topics?", Arrays.asList("ethics", "tone", "integrity")), 
+        	    new Question("Describe how you fact-check sources before publishing.", Arrays.asList("verification", "accuracy", "research")), 
+        	    new Question("Explain how you craft compelling headlines.", Arrays.asList("attention", "clarity", "impact")), 
+        	    new Question("What would you do if a source refuses to speak after providing critical information?", Arrays.asList("backup", "confirmation", "ethics")), 
+        	    new Question("Describe a time when you uncovered hidden details in a story.", Arrays.asList("investigation", "digging", "truth")), 
+        	    new Question("How do you balance writing for engagement versus writing for truth?", Arrays.asList("bias", "integrity", "audience")), 
+        	    new Question("How do you react when your article receives public criticism?", Arrays.asList("feedback", "response", "correction")), 
+        	    new Question("Describe your strategy for conducting an investigative report.", Arrays.asList("sources", "depth", "evidence")), 
+        	    new Question("What role does social media play in modern journalism?", Arrays.asList("distribution", "engagement", "trends")), 
+        	    new Question("How do you manage tight deadlines in reporting?", Arrays.asList("time", "efficiency", "editing")) 
+        	)); 
+        	occupationQuestions.put("Psychologist", Arrays.asList( 
+        	    new Question("How do you approach counseling a patient experiencing severe anxiety?", Arrays.asList("cbt", "coping", "therapy")), 
+        	    new Question("Describe how you handle ethical dilemmas in psychology.", Arrays.asList("conflict", "code", "boundaries")), 
+        	    new Question("What techniques do you use for cognitive behavioral therapy?", Arrays.asList("cbt", "behavior", "thoughts")), 
+        	    new Question("A client is resistant to therapy. How do you engage them?", Arrays.asList("motivation", "trust", "rapport")), 
+        	    new Question("How do you help a patient set realistic mental health goals?", Arrays.asList("planning", "collaboration", "achievable")), 
+        	    new Question("What steps do you take to ensure patient confidentiality?", Arrays.asList("privacy", "ethics", "compliance")), 
+        	    new Question("Describe how you manage emotional burnout as a psychologist.", Arrays.asList("self-care", "balance", "boundaries")), 
+        	    new Question("How do you differentiate between mental health disorders with overlapping symptoms?", Arrays.asList("diagnosis", "criteria", "evaluation")), 
+        	    new Question("What would you do if a patient requests treatment methods you don’t specialize in?", Arrays.asList("referral", "transparency", "scope")), 
+        	    new Question("How do you build trust with new clients?", Arrays.asList("rapport", "empathy", "confidentiality")) 
+        	)); 
+        	occupationQuestions.put("Entrepreneur", Arrays.asList( 
+        	    new Question("You have a great business idea. How do you validate its feasibility?", Arrays.asList("market", "research", "validation")), 
+        	    new Question("What’s your strategy to attract investors?", Arrays.asList("pitch", "roi", "scalability")), 
+        	    new Question("Describe a time you took a financial risk in business.", Arrays.asList("risk", "decision", "outcome")), 
+        	    new Question("How do you handle setbacks and failures?", Arrays.asList("resilience", "learning", "pivot")), 
+        	    new Question("Your competitor launches a similar product. How do you respond?", Arrays.asList("differentiation", "strategy", "positioning")), 
+        	    new Question("How do you negotiate effectively with business partners?", Arrays.asList("deal", "win-win", "communication")), 
+        	    new Question("A major client threatens to leave your company. What would you do?", Arrays.asList("retention", "service", "communication")), 
+        	    new Question("Describe how you structure your business plan before pitching.", Arrays.asList("model", "strategy", "plan")), 
+        	    new Question("You need to build a strong customer base. How do you approach it?", Arrays.asList("marketing", "target", "growth")), 
+        	    new Question("How do you balance short-term and long-term business growth?", Arrays.asList("strategy", "vision", "prioritization")) 
+        	)); 
+        	occupationQuestions.put("Marketing Manager", Arrays.asList( 
+        	    new Question("How do you handle negative feedback from customers?", Arrays.asList("response", "review", "reputation")), 
+        	    new Question("What strategies do you use for brand positioning?", Arrays.asList("identity", "value", "audience")), 
+        	    new Question("Describe a time you ran a successful marketing campaign.", Arrays.asList("campaign", "strategy", "results")), 
+        	    new Question("Your company's product isn't selling well. How do you change strategy?", Arrays.asList("pivot", "research", "promotion")), 
+        	    new Question("What role does data analytics play in modern marketing?", Arrays.asList("insights", "metrics", "roi")), 
+        	    new Question("How do you handle a crisis in public relations?", Arrays.asList("crisis", "statement", "control")), 
+        	    new Question("Your competitor is running a viral campaign. How do you counteract?", Arrays.asList("response", "creative", "engagement")), 
+        	    new Question("How do you measure the success of an ad campaign?", Arrays.asList("kpi", "analytics", "performance")), 
+        	    new Question("What tactics do you use for social media marketing?", Arrays.asList("content", "engagement", "platform")), 
+        	    new Question("How do you adjust marketing approaches for different regions?", Arrays.asList("localization", "culture", "market")) 
+        	)); 
+        for (String occupation : Arrays.asList( 
+        		"Doctor", "Teacher", "Software Engineer", "Lawyer", "Chef", "Pilot", "Architect", "Accountant", 
+                "Nurse", "Police Officer", "Data Analyst", "Journalist", "Psychologist", "Entrepreneur", "Marketing Manager" 
+
+        )) { 
+            occupationQuestions.putIfAbsent(occupation, getGenericQuestions()); 
+        } 
+    } 
+    
+    static List<Question> getGenericQuestions() { 
+        List<Question> questions = new ArrayList<>(); 
+        for (int i = 1; i <= 10; i++) { 
+            questions.add(new Question("Generic question " + i + " for this job?", Arrays.asList("work", "experience", "skill"))); 
+        } 
+        return questions; 
+		}
+}
